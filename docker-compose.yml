@@ -1,0 +1,64 @@
+version: '3.3'
+services:
+  es_node1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    container_name: es_node1
+    environment:
+      - node.name=es_node1
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es_node2
+      - cluster.initial_master_nodes=es_node1,es_node2
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+
+  es_node2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    container_name: es_node2
+    environment:
+      - node.name=es_node2
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es_node1
+      - cluster.initial_master_nodes=es_node1,es_node2
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data02:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9201
+    networks:
+      - elastic
+
+  elastic-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python3", "src/main.py"]
+    environment:
+      es_node1: http://es_node1:9200
+      es_node2: http://es_node2:9200
+    networks:
+      - elastic
+
+volumes:
+  data01:
+    driver: local
+  data02:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge
