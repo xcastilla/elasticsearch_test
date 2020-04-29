@@ -42,16 +42,28 @@ services:
     networks:
       - elastic
 
-  elastic-test:
+  es-query-data:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["python3", "src/main.py"]
+    command: ["python3", "src/data_query.py"]
     environment:
       es_node1: http://es_node1:9200
       es_node2: http://es_node2:9200
     networks:
       - elastic
+
+  es-insert-data:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python3", "src/data_insert.py"]
+    environment:
+      es_node1: http://es_node1:9200
+      es_node2: http://es_node2:9200
+    networks:
+      - elastic
+    
 
 volumes:
   data01:

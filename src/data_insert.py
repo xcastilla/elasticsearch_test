@@ -33,11 +33,6 @@ def insert(client: Any, index: str, dataset: Dict) -> None:
         client.index(index=index, doc_type="external", body=item)
 
 
-def search(client: Any, index: str, query: Dict, size: int = 500):
-    ret = client.search(index=index, body=query, size=size)
-    return ret['hits']['hits']
-
-
 if __name__ == "__main__":
     # Get json sample data
     dataset = fetch_data(URL)
@@ -61,18 +56,3 @@ if __name__ == "__main__":
         }
     }
     esClient.indices.put_mapping(index=index_name, body=body)
-
-    # Fetch all first 20 chemistry prizes sorted by year
-    query = {
-        "sort": {
-            "year": {"order": "asc"}
-        },
-        "query": {
-            "match": {
-                "category": "chemistry"
-            }
-        }
-    }
-    res = search(esClient, index_name, query, size=20)
-    for entry in res:
-        logger.info(entry['_source'])
