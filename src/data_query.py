@@ -12,6 +12,8 @@ logger.setLevel(logging.INFO)
 
 
 def search(client: Any, index: str, query: Dict, size: int = 500):
+    logger.info("#################### Query ####################")
+    logger.info(query)
     ret = client.search(index=index, body=query, size=size)
     return ret['hits']['hits']
 
@@ -32,6 +34,22 @@ if __name__ == "__main__":
             }
         }
     }
+    res = search(esClient, index_name, query, size=20)
+    for entry in res:
+        logger.info(entry['_source'])
+    
+    # Fuzzy search
+    query = {
+        "query": {
+            "fuzzy": {
+                "laureates.motivation": {
+                    "value": "atom",
+                    "fuzziness": "AUTO",
+                }
+            }
+        }
+    }
+    logger.info(esClient.indices.get_mapping('nobel-prizes'))
     res = search(esClient, index_name, query, size=20)
     for entry in res:
         logger.info(entry['_source'])
